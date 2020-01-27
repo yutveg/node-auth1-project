@@ -1,6 +1,5 @@
 module.exports = {
   register,
-  login,
   getUserList,
   findBy
 };
@@ -17,6 +16,6 @@ function register(newUser) {
   return db("users").insert(newUser);
 }
 
-function login(credentials) {}
-
-function getUserList() {}
+function getUserList() {
+  return db("users").select("id", "username");
+}
