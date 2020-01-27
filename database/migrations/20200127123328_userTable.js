@@ -6,7 +6,7 @@ exports.up = function(knex) {
       .unique()
       .notNullable()
       .index();
-    table.string("password", 40).notNullable();
+    table.string("password", 128).notNullable();
   });
 };
 
