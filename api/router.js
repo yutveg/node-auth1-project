@@ -2,6 +2,7 @@ const express = require("express");
 const bc = require("bcryptjs");
 const router = express.Router();
 const Users = require("./model.js");
+const restricted = require("./middleware/restricted.js");
 
 router.post("/register", (req, res) => {
   const user = req.body;
@@ -26,6 +27,7 @@ router.post("/login", (req, res) => {
     .first()
     .then(user => {
       if (user && bc.compareSync(password, user.password)) {
+        req.session.loggedIn = true;
         res.status(200).json({ message: `Welcome back ${user.username}.` });
       } else {
         res.status(401).json({ error: "Invalid Credentials" });
@@ -36,24 +38,14 @@ router.post("/login", (req, res) => {
     });
 });
 
-router.get("/users", (req, res) => {
-  if (req.headers.authorization) {
-    Users.findBy(req.headers.authorization)
-      .first()
-      .then(user => {
-        console.log(user);
-        if (user && bc.compareSync(req.headers.authorization, user.username)) {
-          Users.getUserList();
-        } else {
-          res.status(401).json({ you: "shall not pass!!1" });
-        }
-      })
-      .catch(err => {
-        res.status(500).json(err.message);
-      });
-  } else {
-    res.status(400).json({ error: "No headers detected" });
-  }
+router.get("/users", restricted, (req, res) => {
+  Users.getUserList()
+    .then(result => {
+      res.status(200).json(result);
+    })
+    .catch(err => {
+      res.status(500).json(err.message);
+    });
 });
 
 module.exports = router;
